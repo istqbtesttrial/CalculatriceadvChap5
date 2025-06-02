@@ -2,6 +2,9 @@
 function clearScreen() {
     document.getElementById("result").value = "";
     document.getElementById("operation").innerText = "";
+    history = [];
+    saveHistory();
+    renderHistory();
 }
 
 function deleteLast() {
