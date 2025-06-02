@@ -66,3 +66,17 @@ input {
     background-color: #004d00;
     transform: translateY(-3px);
 }
+
+.history {
+    margin-top: 20px;
+    max-height: 150px;
+    overflow-y: auto;
+    background: #f9f9f9;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.history-settings {
+    margin-top: 15px;
+}
