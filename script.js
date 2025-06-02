@@ -22,9 +22,9 @@ function insert(value) {
 
 // Historique
 const HISTORY_KEY = "calcHistory";
-const HISTORY_LENGTH_KEY = "historyLength";
-let historyLength = parseInt(localStorage.getItem(HISTORY_LENGTH_KEY)) || 5;
+const HISTORY_LENGTH = 10; // taille fixe de l'historique
 let history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+history = history.slice(0, HISTORY_LENGTH);
 
 function saveHistory() {
     localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
@@ -39,27 +39,17 @@ function renderHistory() {
         div.textContent = item;
         container.appendChild(div);
     });
-    const input = document.getElementById("history-length");
-    if (input) input.value = historyLength;
 }
 
 document.addEventListener("DOMContentLoaded", renderHistory);
 
 function addToHistory(entry) {
     history.unshift(entry);
-    if (history.length > historyLength) history.pop();
+    if (history.length > HISTORY_LENGTH) history.pop();
     saveHistory();
     renderHistory();
 }
 
-function updateHistoryLength() {
-    const input = document.getElementById("history-length");
-    historyLength = parseInt(input.value) || 0;
-    localStorage.setItem(HISTORY_LENGTH_KEY, historyLength);
-    history = history.slice(0, historyLength);
-    saveHistory();
-    renderHistory();
-}
 
 // Calculs avancés
 function squareRoot() {

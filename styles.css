@@ -62,6 +62,15 @@ input {
     transition: background-color 0.2s, transform 0.2s;
 }
 
+.card.light {
+    background-color: #f5f5dc;
+    color: #000;
+}
+
+.card.light:hover {
+    background-color: #e0e0c0;
+}
+
 .card:hover {
     background-color: #004d00;
     transform: translateY(-3px);
