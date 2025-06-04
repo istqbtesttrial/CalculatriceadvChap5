@@ -4,49 +4,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculatrice avec Cartes</title>
+    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="calculator">
     <div class="display">
         <div id="operation" class="operation-display"></div>
-        <input type="text" id="result" readonly>
+        <input type="text" id="result" readonly aria-label="Résultat du calcul">
     </div>
     <div class="buttons">
-        <div class="card" id="clearButton">C</div>
-        <div class="card" onclick="deleteLast()">DEL</div>
-        <div class="card" onclick="percentage()">%</div>
-        <div class="card" onclick="squareRoot()">√</div>
+        <button class="card" id="clearButton" type="button">C</button>
+        <button class="card" id="deleteButton" type="button">DEL</button>
+        <button class="card" id="percentageButton" type="button">%</button>
+        <button class="card" id="sqrtButton" type="button">√</button>
 
-        <div class="card light" onclick="insert('7')">7</div>
-        <div class="card light" onclick="insert('8')">8</div>
-        <div class="card light" onclick="insert('9')">9</div>
-        <div class="card" onclick="insert('/')">/</div>
+        <button class="card light number" data-value="7" type="button">7</button>
+        <button class="card light number" data-value="8" type="button">8</button>
+        <button class="card light number" data-value="9" type="button">9</button>
+        <button class="card operator" data-operator="/" type="button">/</button>
 
-        <div class="card light" onclick="insert('4')">4</div>
-        <div class="card light" onclick="insert('5')">5</div>
-        <div class="card light" onclick="insert('6')">6</div>
-        <div class="card" onclick="insert('*', 'X')">X</div>
+        <button class="card light number" data-value="4" type="button">4</button>
+        <button class="card light number" data-value="5" type="button">5</button>
+        <button class="card light number" data-value="6" type="button">6</button>
+        <button class="card operator" data-operator="*" type="button">X</button>
 
-        <div class="card light" onclick="insert('1')">1</div>
-        <div class="card light" onclick="insert('2')">2</div>
-        <div class="card light" onclick="insert('3')">3</div>
-        <div class="card" onclick="insert('-')">-</div>
+        <button class="card light number" data-value="1" type="button">1</button>
+        <button class="card light number" data-value="2" type="button">2</button>
+        <button class="card light number" data-value="3" type="button">3</button>
+        <button class="card operator" data-operator="-" type="button">-</button>
 
-        <div class="card light" onclick="insert('0')">0</div>
-        <div class="card light" onclick="insert('.')">.</div>
-        <div class="card" onclick="insert('^', 'xʸ')">x&#x02B8;</div>
+        <button class="card light number" data-value="0" type="button">0</button>
+        <button class="card light number" data-value="." type="button">.</button>
+        <button class="card operator" data-operator="^" id="powerButton" type="button">x&#x02B8;</button>
 
-        <div class="card" onclick="insert('+')">+</div>
+        <button class="card operator" data-operator="+" type="button">+</button>
 
-        <div class="card" onclick="calculate()" style="grid-column: span 4;">=</div>
+        <button class="card" id="equalsButton" type="button" style="grid-column: span 4;">=</button>
     </div>
     <div id="history" class="history"></div>
 </div>
 <script src="script.js"></script>
 <script>
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js');
+    navigator.serviceWorker.register('service-worker.js').catch(console.error);
 }
 </script>
 </body>
