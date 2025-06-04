@@ -1,114 +1,139 @@
-// Gestion de l'affichage
-function clearScreen() {
-    document.getElementById("result").value = "";
-    document.getElementById("operation").innerText = "";
-}
+(function () {
+  'use strict';
 
-function clearHistory() {
-    history = [];
-    saveHistory();
+  const HISTORY_KEY = 'calcHistory';
+  const HISTORY_LENGTH = 9;
+
+  const elements = {};
+  let history = [];
+
+  function init() {
+    elements.result = document.getElementById('result');
+    elements.operation = document.getElementById('operation');
+    elements.history = document.getElementById('history');
+
+    loadHistory();
     renderHistory();
-}
+    setupListeners();
+  }
 
-function deleteLast() {
-    let resultField = document.getElementById("result");
-    let operationField = document.getElementById("operation");
+  function setupListeners() {
+    document.getElementById('clearButton').addEventListener('click', clearScreen);
+    document.getElementById('deleteButton').addEventListener('click', deleteLast);
+    document.getElementById('percentageButton').addEventListener('click', percentage);
+    document.getElementById('sqrtButton').addEventListener('click', squareRoot);
+    document.getElementById('equalsButton').addEventListener('click', calculate);
+    document.getElementById('powerButton').addEventListener('click', () => handleOperator('^'));
 
-    resultField.value = resultField.value.slice(0, -1);
-    operationField.innerText = operationField.innerText.slice(0, -1);
-}
-
-function insert(value, displayValue = value) {
-    let resultField = document.getElementById("result");
-    let operationField = document.getElementById("operation");
-
-    resultField.value += value;
-    operationField.innerText += displayValue;
-}
-
-// Historique
-const HISTORY_KEY = "calcHistory";
-const HISTORY_LENGTH = 9; // taille fixe de l'historique
-let history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
-history = history.slice(0, HISTORY_LENGTH);
-
-function saveHistory() {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
-}
-
-function renderHistory() {
-    const container = document.getElementById("history");
-    if (!container) return;
-    container.innerHTML = "";
-    history.forEach(item => {
-        const div = document.createElement("div");
-        div.textContent = item;
-        container.appendChild(div);
+    document.querySelectorAll('.number').forEach(btn => {
+      btn.addEventListener('click', () => handleDigit(btn.dataset.value));
     });
-}
+    document.querySelectorAll('.operator').forEach(btn => {
+      btn.addEventListener('click', () => handleOperator(btn.dataset.operator));
+    });
+  }
 
-document.addEventListener("DOMContentLoaded", () => {
-    renderHistory();
-    const clearBtn = document.getElementById("clearButton");
-    if (clearBtn) {
-        clearBtn.addEventListener("click", clearScreen);
-        clearBtn.addEventListener("dblclick", clearHistory);
+  function clearScreen() {
+    elements.result.value = '';
+    elements.operation.textContent = '';
+  }
+
+  function deleteLast() {
+    elements.result.value = elements.result.value.slice(0, -1);
+    elements.operation.textContent = elements.operation.textContent.slice(0, -1);
+  }
+
+  function handleDigit(digit) {
+    elements.result.value += digit;
+    elements.operation.textContent += digit;
+  }
+
+  function handleOperator(op) {
+    elements.result.value += op;
+    elements.operation.textContent += op === '^' ? '^' : op;
+  }
+
+  function percentage() {
+    const expr = elements.result.value || '0';
+    try {
+      const val = safeEval(expr);
+      const res = val / 100;
+      elements.result.value = res;
+      elements.operation.textContent = `${expr}% =`;
+      addToHistory(`${expr}% = ${res}`);
+    } catch (e) {
+      showError();
     }
-});
+  }
 
-function addToHistory(entry) {
+  function squareRoot() {
+    const expr = elements.result.value || '0';
+    try {
+      const val = safeEval(expr);
+      if (val < 0) throw new Error('neg');
+      const res = Math.sqrt(val);
+      elements.result.value = res;
+      elements.operation.textContent = `√(${expr}) =`;
+      addToHistory(`√(${expr}) = ${res}`);
+    } catch (e) {
+      showError();
+    }
+  }
+
+  function calculate() {
+    const expr = elements.result.value;
+    if (!expr) return;
+    try {
+      const res = safeEval(expr);
+      elements.result.value = res;
+      elements.operation.textContent = `${expr} =`;
+      addToHistory(`${expr} = ${res}`);
+    } catch (e) {
+      showError();
+    }
+  }
+
+  function showError() {
+    elements.result.value = 'Erreur';
+    elements.operation.textContent = '';
+  }
+
+  function safeEval(expression) {
+    if (!/^[0-9+\-*/().^ ]+$/.test(expression)) throw new Error('bad');
+    const sanitized = expression.replace(/\^/g, '**');
+    const result = Function(`"use strict"; return (${sanitized})`)();
+    if (typeof result !== 'number' || !isFinite(result)) throw new Error('bad');
+    return result;
+  }
+
+  function addToHistory(entry) {
     history.unshift(entry);
     if (history.length > HISTORY_LENGTH) history.pop();
     saveHistory();
     renderHistory();
-}
+  }
 
-function evaluateExpression(expression) {
-    return eval(expression.replace(/\^/g, '**'));
-}
+  function renderHistory() {
+    if (!elements.history) return;
+    elements.history.innerHTML = '';
+    history.forEach(item => {
+      const div = document.createElement('div');
+      div.textContent = item;
+      elements.history.appendChild(div);
+    });
+  }
 
+  function saveHistory() {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  }
 
-// Calculs avancés
-function squareRoot() {
-    let expression = document.getElementById("result").value || "0";
-    try {
-        let value = evaluateExpression(expression);
-        if (value < 0) throw new Error("Valeur négative");
-        let result = Math.sqrt(value);
-        document.getElementById("result").value = result;
-        document.getElementById("operation").innerText = `√(${expression}) =`;
-        addToHistory(`√(${expression}) = ${result}`);
-    } catch (error) {
-        document.getElementById("result").value = "Erreur";
-        document.getElementById("operation").innerText = "";
-    }
-}
+  function loadHistory() {
+    history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+    history = history.slice(0, HISTORY_LENGTH);
+  }
 
-function percentage() {
-    let expression = document.getElementById("result").value || "0";
-    try {
-        let value = evaluateExpression(expression);
-        let result = value / 100;
-        document.getElementById("result").value = result;
-        document.getElementById("operation").innerText = `${expression}% =`;
-        addToHistory(`${expression}% = ${result}`);
-    } catch (error) {
-        document.getElementById("result").value = "Erreur";
-        document.getElementById("operation").innerText = "";
-    }
-}
+  document.addEventListener('DOMContentLoaded', init);
 
-function calculate() {
-    let expression = document.getElementById("result").value;
-    if (!expression) return;
-    try {
-        let result = evaluateExpression(expression);
-        if (!isFinite(result)) throw new Error("Division par zéro");
-        document.getElementById("result").value = result;
-        document.getElementById("operation").innerText = expression + " =";
-        addToHistory(`${expression} = ${result}`);
-    } catch (error) {
-        document.getElementById("result").value = "Erreur";
-        document.getElementById("operation").innerText = "";
-    }
-}
+  // expose for tests
+  window.CalculatorApp = { safeEval };
+})();
