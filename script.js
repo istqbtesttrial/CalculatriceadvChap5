@@ -18,12 +18,13 @@
   }
 
   function setupListeners() {
-    document.getElementById('clearButton').addEventListener('click', clearScreen);
+    const clearBtn = document.getElementById('clearButton');
+    clearBtn.addEventListener('click', clearScreen);
+    clearBtn.addEventListener('dblclick', clearHistory);
     document.getElementById('deleteButton').addEventListener('click', deleteLast);
     document.getElementById('percentageButton').addEventListener('click', percentage);
     document.getElementById('sqrtButton').addEventListener('click', squareRoot);
     document.getElementById('equalsButton').addEventListener('click', calculate);
-    document.getElementById('powerButton').addEventListener('click', () => handleOperator('^'));
 
     document.querySelectorAll('.number').forEach(btn => {
       btn.addEventListener('click', () => handleDigit(btn.dataset.value));
@@ -36,6 +37,12 @@
   function clearScreen() {
     elements.result.value = '';
     elements.operation.textContent = '';
+  }
+
+  function clearHistory() {
+    history = [];
+    saveHistory();
+    renderHistory();
   }
 
   function deleteLast() {
