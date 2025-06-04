@@ -18,12 +18,12 @@ function deleteLast() {
     operationField.innerText = operationField.innerText.slice(0, -1);
 }
 
-function insert(value) {
+function insert(value, displayValue = value) {
     let resultField = document.getElementById("result");
     let operationField = document.getElementById("operation");
 
     resultField.value += value;
-    operationField.innerText += value;
+    operationField.innerText += displayValue;
 }
 
 // Historique
