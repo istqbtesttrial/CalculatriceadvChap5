@@ -2,6 +2,9 @@
 function clearScreen() {
     document.getElementById("result").value = "";
     document.getElementById("operation").innerText = "";
+}
+
+function clearHistory() {
     history = [];
     saveHistory();
     renderHistory();
@@ -44,7 +47,14 @@ function renderHistory() {
     });
 }
 
-document.addEventListener("DOMContentLoaded", renderHistory);
+document.addEventListener("DOMContentLoaded", () => {
+    renderHistory();
+    const clearBtn = document.getElementById("clearButton");
+    if (clearBtn) {
+        clearBtn.addEventListener("click", clearScreen);
+        clearBtn.addEventListener("dblclick", clearHistory);
+    }
+});
 
 function addToHistory(entry) {
     history.unshift(entry);
