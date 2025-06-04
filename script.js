@@ -28,7 +28,7 @@ function insert(value, displayValue = value) {
 
 // Historique
 const HISTORY_KEY = "calcHistory";
-const HISTORY_LENGTH = 10; // taille fixe de l'historique
+const HISTORY_LENGTH = 9; // taille fixe de l'historique
 let history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
 history = history.slice(0, HISTORY_LENGTH);
 
