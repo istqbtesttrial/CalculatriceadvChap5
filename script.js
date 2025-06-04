@@ -63,12 +63,16 @@ function addToHistory(entry) {
     renderHistory();
 }
 
+function evaluateExpression(expression) {
+    return eval(expression.replace(/\^/g, '**'));
+}
+
 
 // Calculs avancés
 function squareRoot() {
     let expression = document.getElementById("result").value || "0";
     try {
-        let value = eval(expression);
+        let value = evaluateExpression(expression);
         if (value < 0) throw new Error("Valeur négative");
         let result = Math.sqrt(value);
         document.getElementById("result").value = result;
@@ -83,7 +87,7 @@ function squareRoot() {
 function percentage() {
     let expression = document.getElementById("result").value || "0";
     try {
-        let value = eval(expression);
+        let value = evaluateExpression(expression);
         let result = value / 100;
         document.getElementById("result").value = result;
         document.getElementById("operation").innerText = `${expression}% =`;
@@ -98,7 +102,7 @@ function calculate() {
     let expression = document.getElementById("result").value;
     if (!expression) return;
     try {
-        let result = eval(expression);
+        let result = evaluateExpression(expression);
         if (!isFinite(result)) throw new Error("Division par zéro");
         document.getElementById("result").value = result;
         document.getElementById("operation").innerText = expression + " =";
