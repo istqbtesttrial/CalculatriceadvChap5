@@ -29,6 +29,10 @@ describe('safeEval', () => {
     expect(window.CalculatorApp.safeEval('2+3*4')).toBe(14);
   });
 
+  test('computes power expression', () => {
+    expect(window.CalculatorApp.safeEval('2^3')).toBe(8);
+  });
+
   test('throws on invalid characters', () => {
     expect(() => window.CalculatorApp.safeEval('process.exit()')).toThrow();
   });
