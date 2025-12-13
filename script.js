@@ -12,6 +12,7 @@
     elements.operation = document.getElementById('operation');
     elements.history = document.getElementById('history');
     elements.displayArea = document.getElementById('displayArea');
+    elements.liveRegion = document.getElementById('liveRegion');
 
     loadHistory();
     renderHistory();
@@ -22,7 +23,23 @@
     const clearBtn = document.getElementById('clearButton');
     clearBtn.addEventListener('click', clearScreen);
     clearBtn.addEventListener('dblclick', clearHistory);
-    document.getElementById('deleteButton').addEventListener('click', deleteLast);
+    const delBtn = document.getElementById('deleteButton');
+    delBtn.addEventListener('click', deleteLast);
+    // Appui long sur DEL => clear
+    let delPressTimer = null;
+    const startDelPress = () => {
+      clearTimeout(delPressTimer);
+      delPressTimer = setTimeout(() => {
+        clearScreen();
+        if (navigator.vibrate) navigator.vibrate(10);
+      }, 600);
+    };
+    const cancelDelPress = () => clearTimeout(delPressTimer);
+    delBtn.addEventListener('mousedown', startDelPress);
+    delBtn.addEventListener('touchstart', startDelPress, { passive: true });
+    ['mouseup','mouseleave','mouseout','touchend','touchcancel'].forEach(ev => {
+      delBtn.addEventListener(ev, cancelDelPress);
+    });
     document.getElementById('percentageButton').addEventListener('click', percentage);
     document.getElementById('sqrtButton').addEventListener('click', squareRoot);
     document.getElementById('equalsButton').addEventListener('click', calculate);
@@ -34,6 +51,20 @@
       btn.addEventListener('click', () => handleOperator(btn.dataset.operator));
     });
 
+    // Historique cliquable
+    if (elements.history) {
+      elements.history.addEventListener('click', onHistoryClick);
+      elements.history.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          const target = e.target;
+          if (target && target.getAttribute && target.getAttribute('role') === 'listitem') {
+            e.preventDefault();
+            onHistoryClick({ target });
+          }
+        }
+      });
+    }
+
     setupKeyboard();
     setupGestures();
   }
@@ -41,6 +72,7 @@
   function clearScreen() {
     elements.result.value = '';
     elements.operation.textContent = '';
+    announce('Effacé');
   }
 
   function clearHistory() {
@@ -117,6 +149,7 @@
   function showError() {
     elements.result.value = 'Erreur';
     elements.operation.textContent = '';
+    announce('Erreur de calcul');
   }
 
   // --- Validation incrémentale et helpers ---
@@ -131,6 +164,7 @@
     // force reflow
     void elements.displayArea.offsetWidth;
     elements.displayArea.classList.add('invalid-blink');
+    announce('Entrée invalide');
   }
 
   function currentNumberHasDot(expr){
@@ -274,6 +308,21 @@
       }
       // Sinon on laisse le navigateur gérer (pas d'insertion dans l'input car readonly)
     });
+
+    // Raccourcis supplémentaires (Alt)
+    document.addEventListener('keydown', (e) => {
+      // √ : Alt+R
+      if (e.altKey && !e.ctrlKey && !e.metaKey) {
+        if (e.key.toLowerCase() === 'r') {
+          e.preventDefault();
+          squareRoot();
+        } else if (e.key.toLowerCase() === 'p') {
+          // Puissance: Alt+P ajoute ^
+          e.preventDefault();
+          handleOperator('^');
+        }
+      }
+    });
   }
 
   function setupGestures() {
@@ -296,8 +345,8 @@
       const dx = endX - startX;
       const dy = endY - startY;
       const act = gestureAction(dx, dy, threshold);
-      if (act === 'del') deleteLast();
-      if (act === 'clear') clearScreen();
+      if (act === 'del') { deleteLast(); if (navigator.vibrate) navigator.vibrate(8); }
+      if (act === 'clear') { clearScreen(); if (navigator.vibrate) navigator.vibrate(12); }
     });
   }
 
@@ -331,9 +380,37 @@
     elements.history.innerHTML = '';
     history.forEach(item => {
       const div = document.createElement('div');
-      div.textContent = item;
+      div.textContent = toDisplay(item);
+      div.setAttribute('role', 'listitem');
+      div.tabIndex = 0;
       elements.history.appendChild(div);
     });
+  }
+
+  function announce(message){
+    if (!elements.liveRegion) return;
+    elements.liveRegion.textContent = '';
+    // petite temporisation pour forcer l'annonce successive du même message
+    setTimeout(() => {
+      elements.liveRegion.textContent = message;
+    }, 0);
+  }
+
+  function onHistoryClick(e) {
+    const node = e.target;
+    if (!node || !elements.result || !elements.operation) return;
+    const line = node.textContent || '';
+    // Extraire la partie résultat après « = » si présente
+    const idx = line.lastIndexOf('=');
+    if (idx !== -1) {
+      const res = line.slice(idx + 1).trim();
+      elements.result.value = res;
+      elements.operation.textContent = line.trim();
+    } else {
+      // À défaut, remet la ligne dans le résultat
+      elements.result.value = line.trim();
+      elements.operation.textContent = '';
+    }
   }
 
   function saveHistory() {

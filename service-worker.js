@@ -53,3 +53,10 @@ self.addEventListener('fetch', event => {
     })
   );
 });
+
+// Permettre à la page de demander l'activation immédiate du nouveau SW
+self.addEventListener('message', (event) => {
+  if (event && event.data === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});

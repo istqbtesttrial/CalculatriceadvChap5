@@ -12,42 +12,85 @@
     <div class="display" id="displayArea">
         <div id="operation" class="operation-display" role="status" aria-live="polite"></div>
         <input type="text" id="result" readonly aria-label="Résultat du calcul" aria-live="polite">
+        <div id="liveRegion" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
     </div>
     <div class="buttons">
+        <!-- Ligne 1: Outils -->
         <button class="card" id="clearButton" type="button" aria-label="Effacer tout">C</button>
         <button class="card" id="deleteButton" type="button" aria-label="Supprimer le dernier caractère">DEL</button>
         <button class="card" id="percentageButton" type="button" aria-label="Pourcentage de l'expression">%</button>
         <button class="card" id="sqrtButton" type="button" aria-label="Racine carrée">√</button>
 
+        <!-- Ligne 2: Parenthèses, puissance, division -->
+        <button class="card operator" data-operator="(" type="button" aria-label="Parenthèse ouvrante">(</button>
+        <button class="card operator" data-operator=")" type="button" aria-label="Parenthèse fermante">)</button>
+        <button class="card operator" data-operator="^" id="powerButton" type="button" aria-label="Puissance">x&#x02B8;</button>
+        <button class="card operator" data-operator="/" type="button" aria-label="Division">/</button>
+
+        <!-- Ligne 3: 7 8 9 × -->
         <button class="card light number" data-value="7" type="button" aria-label="Sept">7</button>
         <button class="card light number" data-value="8" type="button" aria-label="Huit">8</button>
         <button class="card light number" data-value="9" type="button" aria-label="Neuf">9</button>
-        <button class="card operator" data-operator="/" type="button" aria-label="Division">/</button>
+        <button class="card operator" data-operator="*" type="button" aria-label="Multiplication">×</button>
 
+        <!-- Ligne 4: 4 5 6 − -->
         <button class="card light number" data-value="4" type="button" aria-label="Quatre">4</button>
         <button class="card light number" data-value="5" type="button" aria-label="Cinq">5</button>
         <button class="card light number" data-value="6" type="button" aria-label="Six">6</button>
-        <button class="card operator" data-operator="*" type="button" aria-label="Multiplication">×</button>
+        <button class="card operator" data-operator="-" type="button" aria-label="Soustraction">-</button>
 
+        <!-- Ligne 5: 1 2 3 + -->
         <button class="card light number" data-value="1" type="button" aria-label="Un">1</button>
         <button class="card light number" data-value="2" type="button" aria-label="Deux">2</button>
         <button class="card light number" data-value="3" type="button" aria-label="Trois">3</button>
-        <button class="card operator" data-operator="-" type="button" aria-label="Soustraction">-</button>
-
-        <button class="card light number" data-value="0" type="button" aria-label="Zéro">0</button>
-        <button class="card light number" data-value="." type="button" aria-label="Point">.</button>
-        <button class="card operator" data-operator="^" id="powerButton" type="button" aria-label="Puissance">x&#x02B8;</button>
-
         <button class="card operator" data-operator="+" type="button" aria-label="Addition">+</button>
 
-        <button class="card" id="equalsButton" type="button" style="grid-column: span 4;" aria-label="Calculer">=</button>
+        <!-- Ligne 6: 0 . = (span 2) -->
+        <button class="card light number" data-value="0" type="button" aria-label="Zéro">0</button>
+        <button class="card light number" data-value="." type="button" aria-label="Point">.</button>
+        <button class="card" id="equalsButton" type="button" aria-label="Calculer">=</button>
     </div>
-    <div id="history" class="history"></div>
+    <div id="history" class="history" role="list" aria-label="Historique des calculs"></div>
 </div>
 <script src="script.js"></script>
 <script>
+// Enregistrement du Service Worker + bannière de mise à jour
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js').catch(console.error);
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js').then(reg => {
+      // Détecter une nouvelle version
+      function onNewServiceWorker(registration, callback) {
+        if (!registration) return;
+        if (registration.waiting) return callback(registration);
+        function listenInstalledState() {
+          if (!registration.installing) return;
+          registration.installing.addEventListener('statechange', () => {
+            if (registration.waiting) callback(registration);
+          });
+        }
+        if (registration.installing) listenInstalledState();
+        registration.addEventListener('updatefound', listenInstalledState);
+      }
+
+      onNewServiceWorker(reg, (registration) => {
+        // Créer une bannière d'update
+        const banner = document.createElement('div');
+        banner.className = 'update-banner';
+        banner.setAttribute('role', 'region');
+        banner.setAttribute('aria-label', 'Mise à jour disponible');
+        banner.innerHTML = '<span>Une mise à jour est disponible.</span>' +
+          '<button type="button" class="update-btn">Actualiser</button>' +
+          '<button type="button" class="update-dismiss" aria-label="Fermer">×</button>';
+        document.body.appendChild(banner);
+        const apply = () => {
+          registration.waiting && registration.waiting.postMessage('SKIP_WAITING');
+          navigator.serviceWorker.addEventListener('controllerchange', () => window.location.reload());
+        };
+        banner.querySelector('.update-btn').addEventListener('click', apply);
+        banner.querySelector('.update-dismiss').addEventListener('click', () => banner.remove());
+      });
+    }).catch(console.error);
+  });
 }
 </script>
 </body>

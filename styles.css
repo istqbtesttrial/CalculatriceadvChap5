@@ -50,6 +50,11 @@ input {
     gap: 10px;
 }
 
+/* Mise en forme de la dernière ligne: = occupe deux colonnes */
+.buttons #equalsButton {
+    grid-column: span 2;
+}
+
 .card {
     padding: 20px;
     font-size: 20px;
@@ -60,6 +65,7 @@ input {
     text-align: center;
     cursor: pointer;
     transition: background-color 0.2s, transform 0.2s;
+    min-height: 56px; /* confort tactile */
 }
 
 .card.light {
@@ -94,6 +100,11 @@ button:focus {
     outline: 2px solid #ffa500;
 }
 
+button:focus-visible {
+    outline: 3px solid #ffa500;
+    outline-offset: 2px;
+}
+
 /* Feedback visuel pour entrée invalide */
 .invalid-blink {
     animation: invalid-blink 0.15s linear 1;
@@ -102,4 +113,96 @@ button:focus {
 @keyframes invalid-blink {
     0% { background-color: #ffe6e6; }
     100% { background-color: transparent; }
+}
+
+/* Accessibilité: visuellement caché mais lisible par lecteurs d'écran */
+.visually-hidden {
+    position: absolute !important;
+    height: 1px; width: 1px;
+    overflow: hidden;
+    clip: rect(1px, 1px, 1px, 1px);
+    white-space: nowrap;
+}
+
+/* Bannière de mise à jour PWA */
+.update-banner {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 16px;
+    background: #323232;
+    color: #fff;
+    padding: 10px 12px;
+    border-radius: 8px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 1000;
+}
+.update-banner .update-btn {
+    background: #ffa500;
+    color: #000;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.update-banner .update-dismiss {
+    background: transparent;
+    color: #fff;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+/* Responsive: petits écrans */
+@media (max-width: 360px) {
+    .card {
+        font-size: 18px;
+        padding: 16px;
+        min-height: 48px;
+    }
+    .buttons {
+        gap: 8px;
+    }
+    input {
+        height: 52px;
+        font-size: 24px;
+    }
+    .operation-display {
+        font-size: 16px;
+    }
+}
+
+/* Mode sombre */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #121212;
+        color: #e0e0e0;
+    }
+    .calculator {
+        background-color: #1e1e1e;
+        box-shadow: 0 0 20px rgba(0,0,0,0.6);
+    }
+    input {
+        background-color: #2a2a2a;
+        color: #f5f5f5;
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.4);
+    }
+    .card {
+        background-color: #0e4d0e;
+    }
+    .card.light {
+        background-color: #3a3a2a;
+        color: #f0f0e0;
+    }
+    .card:hover {
+        background-color: #0b3d0b;
+    }
+    .history {
+        background: #2a2a2a;
+    }
+    .update-banner { background: #2d2d2d; }
+    .update-banner .update-btn { background: #ffd166; }
 }
