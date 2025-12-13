@@ -93,3 +93,13 @@ input {
 button:focus {
     outline: 2px solid #ffa500;
 }
+
+/* Feedback visuel pour entrée invalide */
+.invalid-blink {
+    animation: invalid-blink 0.15s linear 1;
+}
+
+@keyframes invalid-blink {
+    0% { background-color: #ffe6e6; }
+    100% { background-color: transparent; }
+}
